@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import type { z } from "zod";
 import { KHOLLES_OFFERTES } from "@/lib/billing/plans";
 import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { KholleSource } from "@/lib/supabase/types";
 import { formatDateLong } from "@/lib/utils/date";
 import {
@@ -143,6 +144,17 @@ export async function guardAiRoute<T extends z.ZodTypeAny>(
   schema: T,
   quotaKind: QuotaKind | null,
 ): Promise<GuardResult<z.infer<T>>> {
+  // Sans base configurée, `createClient()` lève et la route répond 500 : une
+  // erreur brute, qui ressemble à une panne alors que c'est une installation
+  // incomplète. Constaté sur le premier déploiement, dont les variables
+  // n'avaient pas encore été renseignées.
+  if (!isSupabaseConfigured()) {
+    return fail(
+      503,
+      "Le service n'est pas encore disponible. Reviens dans un moment.",
+    );
+  }
+
   const supabase = createClient();
 
   // 1. Authentification — `getUser()` valide le jeton côté serveur.
