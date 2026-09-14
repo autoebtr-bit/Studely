@@ -21,11 +21,7 @@
  * passer, et `new URL("")` lève. C'est exactement ce qui a cassé le build.
  */
 
-/** Retourne la valeur si elle porte quelque chose, sinon `null`. */
-function clean(value: string | undefined): string | null {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : null;
-}
+import { cleanEnv as clean } from "@/lib/env";
 
 export function siteUrl(): string {
   // 1. Valeur explicite. La seule à faire foi dès qu'un domaine propre existe :

@@ -1,5 +1,7 @@
 import "server-only";
 
+import { numberEnv } from "@/lib/env";
+
 /**
  * Choix de modèle et d'effort.
  *
@@ -56,8 +58,9 @@ export const EFFORT: Record<string, Effort> = {
  * essais par mois — au-dessus d'une croissance normale, en dessous d'une
  * campagne d'abus.
  */
-export const FREE_TIER_CEILING_USD = Number(
-  process.env.AI_FREE_TIER_CEILING_USD ?? 500,
+export const FREE_TIER_CEILING_USD = numberEnv(
+  process.env.AI_FREE_TIER_CEILING_USD,
+  500,
 );
 
 /** Plafonds de sortie : large en streaming, plus serré sinon. */
