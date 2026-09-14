@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -18,9 +19,9 @@ export const metadata: Metadata = {
   },
   description:
     "Passe une colle blanche avant la vraie : un examinateur t'interroge à l'oral sur ton programme de khôlle, t'interrompt et te note sur 20.",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  ),
+  // `siteUrl()` ne renvoie jamais de chaîne vide : une variable déclarée mais
+  // non renseignée faisait lever `new URL("")` et cassait le build entier.
+  metadataBase: new URL(siteUrl()),
 };
 
 export const viewport: Viewport = {

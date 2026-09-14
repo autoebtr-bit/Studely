@@ -68,16 +68,12 @@ export function proPriceId(): string {
 /**
  * Adresse publique du site, pour les retours après paiement.
  *
- * Stripe exige des URL absolues. En développement, `localhost` convient ; en
- * production, une valeur fausse renverrait le client payant sur une page
- * inexistante juste après avoir réglé — le pire moment possible.
+ * Réexportée depuis `lib/site-url` plutôt que recalculée : Stripe exige des URL
+ * absolues, et une valeur qui divergerait de celle des métadonnées renverrait
+ * le client payant sur une page inexistante juste après avoir réglé — le pire
+ * moment possible.
  */
-export function siteUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-    "http://localhost:3000"
-  );
-}
+export { siteUrl } from "@/lib/site-url";
 
 /**
  * La traduction des statuts vit dans `./subscription-status`, sans
