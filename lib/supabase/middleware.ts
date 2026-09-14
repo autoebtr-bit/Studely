@@ -24,6 +24,14 @@ const PUBLIC_PREFIXES = [
    * contrôle plus fort qu'une session.
    */
   "/api/billing/webhook",
+
+  /**
+   * Diagnostic de configuration. Accessible sans session, volontairement :
+   * exiger une connexion pour diagnostiquer une panne d'authentification
+   * serait circulaire — c'est précisément quand rien ne marche qu'on en a
+   * besoin. Elle ne renvoie que des booléens, jamais une valeur.
+   */
+  "/api/health",
 ];
 
 /** Chemins réservés aux visiteurs : un utilisateur connecté est redirigé. */
