@@ -1,0 +1,41 @@
+node_modules/
+.pnp
+.pnp.js
+
+.next/
+.next-e2e/
+out/
+build/
+dist/
+
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+screenshots/
+
+.env
+.env.local
+.env.*.local
+
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# Réglages Claude Code personnels (non partagés avec l'équipe)
+.claude/settings.local.json
+
+.DS_Store
+Thumbs.db
+npm-debug.log*
+yarn-error.log*
+
+supabase/.temp/
+supabase/.branches/
+
+# Clone vide de github.com/autoebtr-bit/Studely, resté à côté du projet après
+# une première tentative. Il ne contient aucun fichier, mais son dossier `.git`
+# fait échouer l'indexation du dépôt principal (« does not have a commit
+# checked out »). Supprimable une fois qu'aucun processus ne le retient.
+/Studely/

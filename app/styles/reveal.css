@@ -1,0 +1,110 @@
+/*
+ * Apparition au défilement.
+ *
+ * Les blocs de la landing entrent dans la page au moment où ils arrivent à
+ * l'écran, au lieu d'être tous là d'emblée.
+ *
+ * Deux garde-fous, parce qu'un contenu masqué qui ne réapparaît jamais est une
+ * panne bien pire qu'une animation manquante :
+ *
+ *  1. L'état masqué est conditionné à la classe `js-reveal`, posée par le script
+ *     de `lib/marketing/reveal-script.ts`. Sans JavaScript — script en échec,
+ *     navigateur sans IntersectionObserver, robot d'indexation — la classe
+ *     n'existe pas et tout reste visible.
+ *  2. Le script renonce si l'utilisateur demande moins de mouvement : dans ce
+ *     cas la classe n'est jamais posée, donc rien n'est masqué, même une
+ *     fraction de seconde.
+ *
+ * Deux façons de s'en servir depuis le JSX, sans y écrire le moindre style :
+ *  - `data-reveal` sur un élément : il apparaît seul.
+ *  - `data-reveal-group` sur un conteneur : ses enfants directs apparaissent
+ *    l'un après l'autre, en cascade.
+ */
+
+/*
+ * Les images-clés ne décrivent que le point de départ : l'arrivée est l'état
+ * normal de l'élément. Associé à `animation-fill-mode: backwards`, cela évite
+ * qu'une valeur figée par l'animation continue d'écraser les styles ensuite —
+ * c'est ce qui casserait le soulèvement au survol de `.hover-lift`.
+ */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+  }
+}
+
+@keyframes reveal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@layer components {
+  /* Avant le passage à l'écran. Aucune transformation ici : seule l'opacité
+     masque, ce qui laisse la mise en page absolument intacte. */
+  .js-reveal [data-reveal]:not([data-revealed]),
+  .js-reveal [data-reveal-group]:not([data-revealed]) > * {
+    opacity: 0;
+  }
+
+  .js-reveal [data-reveal][data-revealed],
+  .js-reveal [data-reveal-group][data-revealed] > * {
+    animation: reveal-up 700ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  /* Variantes : `data-reveal="fade"` pour un texte d'appoint, `"scale"` pour
+     un pavé qu'on veut voir se poser. */
+  .js-reveal [data-reveal="fade"][data-revealed] {
+    animation-name: reveal-fade;
+  }
+
+  .js-reveal [data-reveal="scale"][data-revealed] {
+    animation-name: reveal-scale;
+  }
+
+  /*
+   * Cascade des grilles.
+   *
+   * 90 ms d'écart : assez pour lire un balayage de gauche à droite, assez court
+   * pour que la dernière carte d'une rangée n'ait pas l'air en retard. Au-delà
+   * de huit enfants le décalage cesse de croître — sinon une longue liste
+   * finirait par faire attendre.
+   */
+  .js-reveal [data-reveal-group][data-revealed] > *:nth-child(2) {
+    animation-delay: 90ms;
+  }
+  .js-reveal [data-reveal-group][data-revealed] > *:nth-child(3) {
+    animation-delay: 180ms;
+  }
+  .js-reveal [data-reveal-group][data-revealed] > *:nth-child(4) {
+    animation-delay: 270ms;
+  }
+  .js-reveal [data-reveal-group][data-revealed] > *:nth-child(5) {
+    animation-delay: 360ms;
+  }
+  .js-reveal [data-reveal-group][data-revealed] > *:nth-child(6) {
+    animation-delay: 450ms;
+  }
+  .js-reveal [data-reveal-group][data-revealed] > *:nth-child(n + 7) {
+    animation-delay: 540ms;
+  }
+}
+
+/*
+ * Ceinture et bretelles : si la préférence système change après le chargement,
+ * le script ne repasse pas. Cette règle rend alors tout visible immédiatement.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal [data-reveal]:not([data-revealed]),
+  .js-reveal [data-reveal-group]:not([data-revealed]) > * {
+    opacity: 1;
+  }
+}

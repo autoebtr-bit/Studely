@@ -1,0 +1,82 @@
+/*
+ * Point d'entrée des styles globaux.
+ *
+ * Aucun style n'est écrit en dur dans le JSX : les effets de marque
+ * (dégradés, verre dépoli, ornements) vivent dans des fichiers dédiés,
+ * importés ici puis traités par Tailwind.
+ */
+@import "./styles/gradients.css";
+@import "./styles/decorations.css";
+@import "./styles/reveal.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-cream-50 font-sans text-slate-900 antialiased;
+    /* Les ornements du hero débordent volontairement : on coupe l'axe X
+       plutôt que de les contraindre, ce qui aplatirait la composition. */
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    @apply bg-brand-500 text-white;
+  }
+
+  /* Anneau de focus homogène : l'accessibilité clavier ne doit jamais
+     dépendre du composant survolé. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-cream-50;
+  }
+
+  /* Le contenu masqué reste masqué même si une classe entre en conflit. */
+  [hidden] {
+    display: none !important;
+  }
+}
+
+@layer components {
+  .scrollbar-slim {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(206 199 189) transparent;
+  }
+
+  .scrollbar-slim::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-slim::-webkit-scrollbar-thumb {
+    @apply rounded-pill bg-black/15;
+  }
+
+  /* Conteneur horizontal standard des sections de la landing. */
+  .section-shell {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-6 lg:px-8;
+  }
+}
+
+/*
+ * Respect des préférences système : toutes les animations décoratives de la
+ * marque sont désactivées si l'utilisateur demande moins de mouvement.
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
