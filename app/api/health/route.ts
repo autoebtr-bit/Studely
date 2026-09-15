@@ -47,7 +47,7 @@ function describe(value: string | undefined) {
  */
 async function rpcExiste(
   supabase: ReturnType<typeof createClient>,
-  nom: "refund_kholle" | "delete_own_account",
+  nom: "refund_kholle" | "delete_own_account" | "is_admin",
   args: Record<string, unknown>,
 ): Promise<"appliquee" | "absente" | "indetermine"> {
   try {
@@ -80,13 +80,15 @@ export async function GET() {
   if (isSupabaseConfigured()) {
     try {
       const supabase = createClient();
-      const [refund, suppression] = await Promise.all([
+      const [refund, suppression, admin] = await Promise.all([
         rpcExiste(supabase, "refund_kholle", { p_source: "offerte" }),
         rpcExiste(supabase, "delete_own_account", {}),
+        rpcExiste(supabase, "is_admin", {}),
       ]);
       migrations = {
         "0011_kholle_refund": refund,
         "0012_delete_account": suppression,
+        "0013_admin": admin,
       };
     } catch {
       migrations = { _: "vérification impossible" };

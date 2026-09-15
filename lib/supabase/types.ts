@@ -461,6 +461,39 @@ export type Database = {
         Args: Record<string, never>;
         Returns: undefined;
       };
+      /** L'appelant a-t-il accès au tableau d'administration ? */
+      is_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      /**
+       * Chiffres du mois pour l'administration. Agrégats uniquement : aucun
+       * contenu de cours, de khôlle ou de copie n'en sort.
+       */
+      admin_overview: {
+        Args: Record<string, never>;
+        Returns: {
+          comptes: number;
+          comptes_semaine: number;
+          abonnes_actifs: number;
+          abonnes_en_retard: number;
+          essais_epuises: number;
+          kholles_mois: number;
+          cours_importes: number;
+          cout_mois_usd: number;
+          cout_gratuit_mois_usd: number;
+        }[];
+      };
+      /** Comptes qui coûtent le plus ce mois-ci — détection d'abus. */
+      admin_top_spenders: {
+        Args: { p_limit?: number };
+        Returns: {
+          email: string;
+          plan: PlanTier;
+          cout_usd: number;
+          appels: number;
+        }[];
+      };
       kholle_balance: {
         Args: Record<string, never>;
         Returns: {
