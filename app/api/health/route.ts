@@ -1,3 +1,4 @@
+import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isStripeConfigured } from "@/lib/billing/stripe";
 
@@ -30,10 +31,70 @@ function describe(value: string | undefined) {
   return { present: v.length > 0, length: v.length };
 }
 
-export function GET() {
+/**
+ * Une fonction SQL est-elle présente en base ?
+ *
+ * On l'appelle sans session et on lit le code d'erreur de Postgres, plutôt que
+ * d'interroger un catalogue — ce qui demanderait des droits qu'on n'a pas.
+ *
+ * - `42883` : la fonction **n'existe pas**. La migration n'est pas passée.
+ * - `42501` : elle existe, et l'exécution est **refusée au rôle anonyme**.
+ *   C'est le résultat attendu, et il prouve deux choses d'un coup : la
+ *   migration est appliquée, et le verrou d'accès est en place.
+ *
+ * Rien n'est exécuté au passage : le refus tombe avant le corps de la
+ * fonction. Sonder `delete_own_account` de cette façon n'efface rien.
+ */
+async function rpcExiste(
+  supabase: ReturnType<typeof createClient>,
+  nom: "refund_kholle" | "delete_own_account",
+  args: Record<string, unknown>,
+): Promise<"appliquee" | "absente" | "indetermine"> {
+  try {
+    const { error } = await supabase.rpc(
+      nom as never,
+      args as never,
+    );
+
+    // Pas d'erreur du tout : la fonction existe et a accepté l'appel.
+    if (!error) return "appliquee";
+
+    if (error.code === "42883") return "absente";
+    if (error.code === "42501" || error.code === "28000") return "appliquee";
+
+    return "indetermine";
+  } catch {
+    return "indetermine";
+  }
+}
+
+export async function GET() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
 
+  // Les migrations ne se sondent que si la base répond ; sans configuration,
+  // la question n'a pas de sens.
+  let migrations: Record<string, string> = {
+    _: "base non configurée, rien à vérifier",
+  };
+
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = createClient();
+      const [refund, suppression] = await Promise.all([
+        rpcExiste(supabase, "refund_kholle", { p_source: "offerte" }),
+        rpcExiste(supabase, "delete_own_account", {}),
+      ]);
+      migrations = {
+        "0011_kholle_refund": refund,
+        "0012_delete_account": suppression,
+      };
+    } catch {
+      migrations = { _: "vérification impossible" };
+    }
+  }
+
   return Response.json({
+    migrations,
     supabase: {
       url: {
         ...describe(process.env.NEXT_PUBLIC_SUPABASE_URL),
