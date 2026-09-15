@@ -10,7 +10,7 @@ import { levelProgress } from "@/lib/xp/level";
 import { cn } from "@/lib/utils/cn";
 
 interface TopbarProps {
-  user: { fullName: string; xpTotal: number; streakCurrent: number };
+  user: { fullName: string; xpTotal: number; streakCurrent: number; isAdmin?: boolean };
   counters?: { dueFlashcards?: number };
 }
 

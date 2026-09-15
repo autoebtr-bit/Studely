@@ -22,7 +22,13 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const configured = isSupabaseConfigured();
-  const profile = configured ? await readProfile() : null;
+
+  // Les deux lectures étaient enchaînées, donc payées l'une après l'autre. Sur
+  // un serveur éloigné de la base, ce shell — rendu à CHAQUE page — doublait à
+  // lui seul la latence perçue. Elles ne dépendent pas l'une de l'autre.
+  const [profile, dueFlashcards] = configured
+    ? await Promise.all([readProfile(), readDueFlashcardCount()])
+    : [null, 0];
 
   if (configured && !profile) redirect("/login");
 
@@ -30,11 +36,12 @@ export default async function AppLayout({
     fullName: profile?.fullName ?? "Invité",
     xpTotal: profile?.xpTotal ?? 0,
     streakCurrent: profile?.streakCurrent ?? 0,
+    // Décide seulement de l'affichage du lien d'administration. L'accès réel
+    // est contrôlé côté base, pas ici.
+    isAdmin: profile?.isAdmin === true,
   };
 
-  const counters = {
-    dueFlashcards: configured ? await readDueFlashcardCount() : 0,
-  };
+  const counters = { dueFlashcards };
 
   return (
     <div className="flex min-h-screen bg-cream-50">

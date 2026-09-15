@@ -22,6 +22,18 @@ export interface AppUser {
   streakBest: number;
   /** Date d'inscription — sert à distinguer un compte neuf. */
   createdAt: string;
+  /**
+   * Accès au tableau de bord d'administration.
+   *
+   * Lu ici parce que c'est une colonne de `profiles` : l'inclure dans une
+   * requête qui a lieu de toute façon ne coûte rien, là où une RPC dédiée
+   * ajouterait un aller-retour à **chaque** page, pour tout le monde.
+   *
+   * Sert uniquement à afficher ou masquer un lien. L'autorisation réelle est
+   * rendue par les fonctions SQL du tableau de bord, qui refusent de répondre
+   * indépendamment de ce que prétend l'interface.
+   */
+  isAdmin: boolean;
 }
 
 /**
@@ -45,7 +57,7 @@ export async function readProfile(): Promise<AppUser | null> {
     const { data, error } = await supabase
       .from("profiles")
       .select(
-        "id, full_name, avatar_url, study_level, exam_date, xp_total, level, streak_current, streak_best, created_at",
+        "id, full_name, avatar_url, study_level, exam_date, xp_total, level, streak_current, streak_best, created_at, is_admin",
       )
       .eq("id", user.id)
       .maybeSingle();
@@ -66,6 +78,7 @@ export async function readProfile(): Promise<AppUser | null> {
       streakCurrent: data.streak_current,
       streakBest: data.streak_best,
       createdAt: data.created_at,
+      isAdmin: data.is_admin === true,
     };
   } catch {
     // Un profil illisible ne doit pas empêcher d'afficher l'application.

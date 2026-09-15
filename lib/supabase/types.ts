@@ -73,6 +73,8 @@ export type ProfileRow = {
   onboarded_at: string | null;
   created_at: string;
   updated_at: string;
+  /** Accès au tableau de bord d'administration (migration `0013`). */
+  is_admin: boolean;
 }
 
 export type SubjectRow = {

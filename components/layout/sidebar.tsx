@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight, LogOut } from "lucide-react";
-import { NAV_GROUPS } from "./sidebar-nav";
+import { navGroupsFor } from "./sidebar-nav";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { levelProgress } from "@/lib/xp/level";
 import { cn } from "@/lib/utils/cn";
 
 interface SidebarProps {
-  user: { fullName: string; xpTotal: number };
+  user: { fullName: string; xpTotal: number; isAdmin?: boolean };
   counters?: { dueFlashcards?: number };
   /** Ferme le tiroir sur mobile après un clic. */
   onNavigate?: () => void;
@@ -27,6 +27,7 @@ interface SidebarProps {
 export function Sidebar({ user, counters, onNavigate, className }: SidebarProps) {
   const pathname = usePathname();
   const p = levelProgress(user.xpTotal);
+  const groups = navGroupsFor(user.isAdmin === true);
 
   return (
     <nav
@@ -77,7 +78,7 @@ export function Sidebar({ user, counters, onNavigate, className }: SidebarProps)
 
       {/* Liens */}
       <div className="scrollbar-slim mt-5 flex-1 overflow-y-auto px-3 pb-4">
-        {NAV_GROUPS.map((group, gi) => (
+        {groups.map((group, gi) => (
           <div key={group.label ?? `g${gi}`} className={cn(gi > 0 && "mt-6")}>
             {group.label && (
               <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-white/35">
