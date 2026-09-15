@@ -1,12 +1,13 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { Suspense } from "react";
+import { BellOff } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { readProfile } from "@/lib/data/profile";
 import { readSubscription } from "@/lib/data/billing";
-import { formatDateLong } from "@/lib/utils/date";
+import { ProfileCard } from "./profile-card";
 import { SubscriptionCard } from "./subscription-card";
+import { DangerCard } from "./danger-card";
 
 export const metadata: Metadata = { title: "Paramètres" };
 
@@ -24,23 +25,12 @@ export default async function ParametresPage() {
     <div className="mx-auto max-w-2xl">
       <PageHeader title="Paramètres" description="Ton compte et tes préférences." />
 
-      <Card className="p-6">
-        <h2 className="text-sm font-semibold text-slate-900">Profil</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <Field label="Nom complet" value={profile?.fullName ?? "—"} />
-          <Field label="Adresse e-mail" value={profile?.email ?? "—"} />
-          {/* Renseignés au questionnaire d'accueil : vides tant qu'il n'a pas
-              été rempli, plutôt qu'inventés. */}
-          <Field label="Niveau d'études" value={profile?.studyLevel ?? "Non renseigné"} />
-          <Field
-            label="Date d'examen"
-            value={profile?.examDate ? formatDateLong(profile.examDate) : "Non renseignée"}
-          />
-        </div>
-        <Button className="mt-5" size="sm" variant="outline">
-          Modifier mon profil
-        </Button>
-      </Card>
+      <ProfileCard
+        fullName={profile?.fullName ?? ""}
+        email={profile?.email ?? ""}
+        studyLevel={profile?.studyLevel ?? null}
+        examDate={profile?.examDate ?? null}
+      />
 
       {/* `useSearchParams` impose une frontière Suspense, sinon le prérendu de
           production échoue. */}
@@ -54,69 +44,26 @@ export default async function ParametresPage() {
         <SubscriptionCard {...subscription} />
       </Suspense>
 
+      {/*
+        Trois interrupteurs de notification vivaient ici — rappel quotidien,
+        alerte de série, résumé hebdomadaire. Aucun n'était relié à quoi que ce
+        soit : pas de colonne en base, pas d'envoi d'e-mail, rien. Les cocher ne
+        faisait rien et ne promettait que du vide.
+
+        Les retirer plutôt que de les laisser : un réglage qui ne règle rien use
+        la confiance bien plus qu'une fonction annoncée comme à venir.
+      */}
       <Card className="mt-4 p-6">
         <h2 className="text-sm font-semibold text-slate-900">Notifications</h2>
-        <div className="mt-4 space-y-3">
-          <Toggle
-            label="Rappel de révision quotidien"
-            hint="Une notification à l'heure de ta séance planifiée."
-            defaultChecked
-          />
-          <Toggle
-            label="Alerte de série"
-            hint="Prévenu avant de perdre ta série en cours."
-            defaultChecked
-          />
-          <Toggle
-            label="Résumé hebdomadaire"
-            hint="Ton bilan de progression, chaque dimanche."
-          />
-        </div>
-      </Card>
-
-      <Card className="mt-4 border-red-200 p-6">
-        <h2 className="text-sm font-semibold text-red-700">Zone sensible</h2>
-        <p className="mt-2 text-sm text-slate-600">
-          La suppression du compte efface définitivement tes cours, tes cartes et
-          ta progression. Cette action est irréversible.
+        <p className="mt-2 flex items-start gap-2.5 text-sm text-slate-600">
+          <BellOff className="mt-0.5 size-4 shrink-0 text-slate-400" aria-hidden />
+          Aucune notification n&apos;est envoyée pour l&apos;instant. Les rappels
+          de révision et le bilan hebdomadaire arriveront dans une prochaine
+          version — tu pourras alors choisir ce que tu reçois.
         </p>
-        <Button className="mt-4" size="sm" variant="danger">
-          Supprimer mon compte
-        </Button>
       </Card>
-    </div>
-  );
-}
 
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-0.5 text-sm text-slate-900">{value}</p>
+      <DangerCard />
     </div>
-  );
-}
-
-function Toggle({
-  label,
-  hint,
-  defaultChecked = false,
-}: {
-  label: string;
-  hint: string;
-  defaultChecked?: boolean;
-}) {
-  return (
-    <label className="flex cursor-pointer items-start gap-3">
-      <input
-        type="checkbox"
-        defaultChecked={defaultChecked}
-        className="mt-0.5 size-4 shrink-0 accent-brand-600"
-      />
-      <span className="min-w-0">
-        <span className="block text-sm font-medium text-slate-900">{label}</span>
-        <span className="block text-xs text-slate-500">{hint}</span>
-      </span>
-    </label>
   );
 }

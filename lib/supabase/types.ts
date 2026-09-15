@@ -453,6 +453,14 @@ export type Database = {
         Args: { p_source: KholleSource };
         Returns: undefined;
       };
+      /**
+       * Efface le compte de l'appelant et toutes ses données.
+       * Laisse `trial_grants` intacte : l'essai gratuit ne se rouvre pas.
+       */
+      delete_own_account: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
       kholle_balance: {
         Args: Record<string, never>;
         Returns: {

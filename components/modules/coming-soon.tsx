@@ -57,17 +57,21 @@ export function ComingSoon({ module }: { module: ModuleDef }) {
               "Ce module est en cours de construction et arrivera dans une prochaine version."}
           </p>
 
+          {/* Ce texte annonçait « lance une colle orale », d'avant le recentrage
+              sur les khôlles, et promettait des modules « pleinement
+              opérationnels » — une affirmation qu'un compte neuf dément
+              aussitôt, puisqu'il n'a aucun cours. */}
           <p className="mt-4 text-sm text-slate-600">
-            En attendant, les modules de révision sont pleinement opérationnels :
-            importe un cours, génère tes flashcards et lance une colle orale.
+            En attendant, le reste t&apos;est ouvert : importe un cours, passe
+            une khôlle blanche, et révise tes questions de cours.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-2.5">
-            <Link href="/cours">
-              <Button>Aller à mes cours</Button>
+            <Link href="/kholle">
+              <Button>Passer une khôlle</Button>
             </Link>
-            <Link href="/flashcards">
-              <Button variant="outline">Réviser mes flashcards</Button>
+            <Link href="/importer">
+              <Button variant="outline">Importer un cours</Button>
             </Link>
           </div>
         </div>

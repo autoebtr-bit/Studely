@@ -46,6 +46,46 @@ const FOOTER_LINKS = FOOTER_COLUMNS.flatMap((column) =>
   column.links.map((link) => link.href),
 ).filter((href) => href.startsWith("/"));
 
+/** Chemins déclarés publics dans le middleware, hors routes d'API. */
+function publicPrefixes(): string[] {
+  const source = readFileSync(
+    join(ROOT, "lib", "supabase", "middleware.ts"),
+    "utf8",
+  );
+
+  const bloc = source.slice(
+    source.indexOf("const PUBLIC_PREFIXES"),
+    source.indexOf("const GUEST_ONLY"),
+  );
+
+  return [...bloc.matchAll(/"(\/[^"]*)"/g)]
+    .map((m) => m[1]!)
+    // Les routes d'API n'ont pas de page, et `/auth` n'expose qu'un callback.
+    .filter((p) => !p.startsWith("/api/") && p !== "/auth");
+}
+
+describe("chemins publics du middleware", () => {
+  const PREFIXES = publicPrefixes();
+
+  it("en trouve plusieurs", () => {
+    // Garde-fou : si l'extraction cesse de fonctionner, le test passerait au
+    // vert en ne vérifiant plus rien.
+    expect(PREFIXES.length).toBeGreaterThanOrEqual(4);
+  });
+
+  /**
+   * Laisser passer un visiteur vers une page inexistante est pire qu'un simple
+   * oubli : `/tarifs` était autorisée sans exister, et c'est précisément
+   * l'adresse qu'on partage quand on parle du prix. Chaque visiteur non
+   * connecté y trouvait un 404.
+   */
+  it.each(PREFIXES)("%s a bien une page", (prefix) => {
+    expect(ROUTES.has(prefix), `${prefix} est publique mais n'existe pas`).toBe(
+      true,
+    );
+  });
+});
+
 describe("liens du pied de page", () => {
   it("en contient au moins un vers une page légale", () => {
     // Garde-fou du test : sans cette assertion, retirer tous les liens le
